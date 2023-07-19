@@ -3,6 +3,7 @@ const User = require("../models/User");
 const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../utils/errorPhrase");
 const { ErrorHandler, SECRET_KEY } = require("../utils/utils");
 const jwt = require('jsonwebtoken');
+const Order = require("../models/order");
 
 const createUser = async (req, res) => {
     let body = "";
@@ -38,7 +39,7 @@ const createUser = async (req, res) => {
 }
 const getUsers = async (req, res) => {
     try {
-        const users = await User.findAll();
+        const users = await User.findAll({ include: [{ model: Order, required: false }], });
         res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
         res.end(JSON.stringify({ data: users }));
     } catch (error) {
