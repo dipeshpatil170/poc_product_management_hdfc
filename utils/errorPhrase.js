@@ -16,7 +16,10 @@ const ErrorPhrases = {
     UNAUTHORIZED: 'Unauthorized',
     INVALID_TOKEN: 'Invalid Token',
     FORBIDDEN: 'forbidden',
-    USER_NOT_FOUND: 'User not found'
+    USER_NOT_FOUND: 'User not found',
+    INVALID_CREDENTIALS: 'Invalid Credentials',
+    ID_NOT_FOUND: 'ID not found in url',
+    DATA_NOT_FOUND: 'The data you are trying to search it is not found'
 }
 
 module.exports = {

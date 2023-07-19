@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 const { CONTENT_TYPE_APPLICATION_JSON, StatusCode, ErrorPhrases } = require('./utils/errorPhrase');
 const userController = require('./controllers/userController');
+const productController = require('./controllers/productController');
 const { SECRET_KEY } = require('./utils/utils');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
@@ -11,12 +12,23 @@ const server = http.createServer((req, res) => {
     const { pathname, query } = url.parse(req.url, true);
     const method = req.method;
 
+
     if (method === 'POST' && pathname === '/users') {
         userController.createUser(req, res);
+    } else if (method === 'POST' && pathname === '/users/login') {
+        userController.userLogin(req, res);
     } else {
         customMiddleware(req, res, () => {
             if (method === 'GET' && pathname === '/users') {
                 userController.getUsers(req, res);
+            } else if (method === 'POST' && pathname === '/users/reset-password') {
+                userController.userPasswordReset(req, res);
+            } else if (method === 'POST' && pathname === '/products') {
+                productController.createProduct(req, res);
+            } else if (method === 'GET' && pathname === '/products') {
+                productController.getProducts(req, res);
+            } else if (method === 'GET' && pathname.includes('/product/')) {
+                productController.getSingleProduct(req, res,pathname);
             } else {
                 res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
                 res.end(JSON.stringify({ message: ErrorPhrases.END_POINT_NOT_FOUND }));
@@ -43,7 +55,7 @@ const customMiddleware = async (req, res, next) => {
         const decoded = jwt.verify(seperatedtoken, SECRET_KEY);
 
         const user = await User.findByPk(decoded.userId);
-        
+
         if (!user) {
             res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
             return res.end(JSON.stringify({ message: ErrorPhrases.USER_NOT_FOUND }));

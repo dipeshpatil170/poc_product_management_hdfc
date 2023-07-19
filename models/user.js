@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/dbConfig');
+const Order = require('./order');
 
 const User = sequelize.define('user', {
   id: {
@@ -34,6 +35,8 @@ const User = sequelize.define('user', {
     allowNull: true,
   },
 });
+
+// User.hasMany(Order);
 
 
 
