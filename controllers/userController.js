@@ -4,6 +4,7 @@ const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../
 const { ErrorHandler } = require("../utils/utils");
 const jwt = require('jsonwebtoken');
 const Order = require("../models/order");
+const moment = require('moment-timezone');
 
 const createUser = async (req, res) => {
     let body = "";
@@ -23,7 +24,10 @@ const createUser = async (req, res) => {
                 password: hashedPassword,
             });
 
-            const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY);
+            const timezone = 'Asia/Kolkata';
+            const expirationTime = moment().add(process.env.TOKEN_EXPIERY, 'minutes').tz(timezone).unix();
+
+            const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, { expiresIn: expirationTime });
 
             user.token = token;
             await user.save();
@@ -32,6 +36,7 @@ const createUser = async (req, res) => {
             res.end(JSON.stringify({ data: user }));
 
         } catch (error) {
+            console.log(error)
             res.writeHead(StatusCode.INTERNAL_SERVER_ERROR, CONTENT_TYPE_APPLICATION_JSON);
             res.end(JSON.stringify({ message: ErrorHandler(error) }));
         }

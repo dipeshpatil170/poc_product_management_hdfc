@@ -68,7 +68,7 @@ const customMiddleware = async (req, res, next) => {
     } catch (error) {
         console.error(error);
         res.writeHead(StatusCode.FORBIDDEN, CONTENT_TYPE_APPLICATION_JSON);
-        return res.end(JSON.stringify({ message: `${ErrorPhrases.FORBIDDEN}- Issue in verifying token` }));
+        return res.end(JSON.stringify({ message: `${ErrorPhrases.FORBIDDEN}- Issue in verifying token - ${error.message}` }));
     }
 };
 
