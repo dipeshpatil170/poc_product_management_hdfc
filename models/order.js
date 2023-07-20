@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/dbConfig');
 const User = require('./User');
+const Product = require('./product');
 
 const Order = sequelize.define('order', {
     id: {
@@ -28,6 +29,10 @@ const Order = sequelize.define('order', {
     productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: Product,
+            key: "id"
+        }
     },
     totalPrice: {
         type: DataTypes.FLOAT,

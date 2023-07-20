@@ -1,6 +1,7 @@
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/dbConfig');
+const Order = require('./order');
 
 const Product = sequelize.define('product', {
     id: {
@@ -28,5 +29,6 @@ const Product = sequelize.define('product', {
         allowNull: true,
     },
 });
+
 
 module.exports = Product;

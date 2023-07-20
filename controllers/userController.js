@@ -1,10 +1,11 @@
 const bcrypt = require("bcryptjs/dist/bcrypt");
 const User = require("../models/User");
 const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../utils/errorPhrase");
-const { ErrorHandler } = require("../utils/utils");
+const { ErrorHandler, extractUserId } = require("../utils/utils");
 const jwt = require('jsonwebtoken');
 const Order = require("../models/order");
 const moment = require('moment-timezone');
+const Product = require("../models/product");
 
 const createUser = async (req, res) => {
     let body = "";
@@ -129,9 +130,52 @@ const userPasswordReset = async (req, res) => {
     });
 };
 
+const findOrdersOfUser = async (req, res) => {
+    try {
+        const userId = await extractUserId(req);
+
+        const user = await User.findByPk(userId, {
+            include: Order,
+        });
+
+        const product = await Product.findAll();
+
+        let orderArray = [];
+        user.orders.forEach((order) => {
+            let prodObj = {order};
+            const filtered = product.filter((data) => data.id === order.productId);
+            prodObj['name'] = Array.isArray(filtered) ? filtered[0].name : "";
+            orderArray.push(prodObj)
+        })
+
+        res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
+        res.end(JSON.stringify({ data: orderArray, count: user.orders.length }));
+    } catch (error) {
+        console.log(error)
+        res.writeHead(StatusCode.INTERNAL_SERVER_ERROR, CONTENT_TYPE_APPLICATION_JSON);
+        res.end(JSON.stringify({ message: ErrorHandler(error) }));
+    }
+}
+const findDetailsOfCurrentUser = async (req, res) => {
+    try {
+        const userId = await extractUserId(req);
+
+        const user = await User.findByPk(userId);
+
+        res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
+        res.end(JSON.stringify({ data: user, count: 1 }));
+    } catch (error) {
+        console.log(error)
+        res.writeHead(StatusCode.INTERNAL_SERVER_ERROR, CONTENT_TYPE_APPLICATION_JSON);
+        res.end(JSON.stringify({ message: ErrorHandler(error) }));
+    }
+}
+
 module.exports = {
     createUser,
     getUsers,
     userLogin,
-    userPasswordReset
+    userPasswordReset,
+    findOrdersOfUser,
+    findDetailsOfCurrentUser
 }

@@ -25,6 +25,10 @@ const server = http.createServer((req, res) => {
                 userController.getUsers(req, res);
             } else if (method === 'POST' && pathname === '/users/reset-password') {
                 userController.userPasswordReset(req, res);
+            } else if (method === 'GET' && pathname === '/users/me/orders') {
+                userController.findOrdersOfUser(req, res);
+            } else if (method === 'GET' && pathname === '/users/me') {
+                userController.findDetailsOfCurrentUser(req, res);
             } else if (method === 'POST' && pathname === '/products') {
                 productController.createProduct(req, res);
             } else if (method === 'GET' && pathname === '/products') {
