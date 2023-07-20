@@ -4,7 +4,6 @@ const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../
 const { ErrorHandler, extractUserId } = require("../utils/utils");
 const jwt = require('jsonwebtoken');
 const Order = require("../models/order");
-const moment = require('moment-timezone');
 const Product = require("../models/product");
 
 const createUser = async (req, res) => {
@@ -25,10 +24,7 @@ const createUser = async (req, res) => {
                 password: hashedPassword,
             });
 
-            const timezone = 'Asia/Kolkata';
-            const expirationTime = moment().add(process.env.TOKEN_EXPIERY, 'minutes').tz(timezone).unix();
-
-            const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, { expiresIn: expirationTime });
+            const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIERY });
 
             user.token = token;
             await user.save();
@@ -135,21 +131,14 @@ const findOrdersOfUser = async (req, res) => {
         const userId = await extractUserId(req);
 
         const user = await User.findByPk(userId, {
-            include: Order,
+            include: {
+                model: Order,
+                include: Product,
+            },
         });
 
-        const product = await Product.findAll();
-
-        let orderArray = [];
-        user.orders.forEach((order) => {
-            let prodObj = {order};
-            const filtered = product.filter((data) => data.id === order.productId);
-            prodObj['name'] = Array.isArray(filtered) ? filtered[0].name : "";
-            orderArray.push(prodObj)
-        })
-
         res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
-        res.end(JSON.stringify({ data: orderArray, count: user.orders.length }));
+        res.end(JSON.stringify({ data: user.orders, count: user.orders.length }));
     } catch (error) {
         console.log(error)
         res.writeHead(StatusCode.INTERNAL_SERVER_ERROR, CONTENT_TYPE_APPLICATION_JSON);

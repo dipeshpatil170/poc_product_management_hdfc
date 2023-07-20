@@ -14,10 +14,6 @@ const Order = sequelize.define('order', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    quantity: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -48,5 +44,6 @@ const Order = sequelize.define('order', {
     },
 });
 
+Order.belongsTo(Product, { foreignKey: 'productId' }); 
 
 module.exports = Order;
