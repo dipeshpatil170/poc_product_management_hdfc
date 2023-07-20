@@ -1,6 +1,6 @@
 const Product = require("../models/product");
 const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../utils/errorPhrase");
-const { ErrorHandler } = require("../utils/utils");
+const { ErrorHandler, notFound } = require("../utils/utils");
 const url = require('url');
 const { Op } = require('sequelize');
 
@@ -33,13 +33,7 @@ const getProducts = async (req, res) => {
     try {
         const { query } = url.parse(req.url, true);
         const { page = 1, limit = 10, sortBy, sortOrder, filter } = query;
-        console.log({
-            page,
-            limit,
-            sortBy,
-            sortOrder,
-            filter
-        });
+
         const options = {
             offset: (page - 1) * limit,
             limit: parseInt(limit),
@@ -81,7 +75,7 @@ const getSingleProduct = async (req, res, pathname) => {
             const product = await Product.findByPk(id);
             if (!product) {
                 res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
-                res.end(JSON.stringify({ message: ErrorPhrases.DATA_NOT_FOUND }));
+                res.end(JSON.stringify({ message: notFound('Product', id) }));
             } else {
                 res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
                 res.end(JSON.stringify({ data: product }));

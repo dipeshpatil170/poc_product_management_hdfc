@@ -3,9 +3,11 @@ const url = require('url');
 const { CONTENT_TYPE_APPLICATION_JSON, StatusCode, ErrorPhrases } = require('./utils/errorPhrase');
 const userController = require('./controllers/userController');
 const productController = require('./controllers/productController');
-const { SECRET_KEY } = require('./utils/utils');
+const orderController = require('./controllers/orderController');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const { notFound } = require('./utils/utils');
+require('dotenv').config();
 
 const server = http.createServer((req, res) => {
 
@@ -28,7 +30,9 @@ const server = http.createServer((req, res) => {
             } else if (method === 'GET' && pathname === '/products') {
                 productController.getProducts(req, res);
             } else if (method === 'GET' && pathname.includes('/product/')) {
-                productController.getSingleProduct(req, res,pathname);
+                productController.getSingleProduct(req, res, pathname);
+            } else if (method === 'POST' && pathname === '/products/order') {
+                orderController.placeOrder(req, res);
             } else {
                 res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
                 res.end(JSON.stringify({ message: ErrorPhrases.END_POINT_NOT_FOUND }));
@@ -52,13 +56,13 @@ const customMiddleware = async (req, res, next) => {
         }
         const seperatedtoken = matches[1];
 
-        const decoded = jwt.verify(seperatedtoken, SECRET_KEY);
+        const decoded = jwt.verify(seperatedtoken, process.env.SECRET_KEY);
 
         const user = await User.findByPk(decoded.userId);
 
         if (!user) {
             res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
-            return res.end(JSON.stringify({ message: ErrorPhrases.USER_NOT_FOUND }));
+            return res.end(JSON.stringify({ message: notFound('User', decoded.userId) }));
         }
         next();
     } catch (error) {
@@ -67,6 +71,7 @@ const customMiddleware = async (req, res, next) => {
         return res.end(JSON.stringify({ message: `${ErrorPhrases.FORBIDDEN}- Issue in verifying token` }));
     }
 };
+
 
 const port = 3000;
 server.listen(port, () => {

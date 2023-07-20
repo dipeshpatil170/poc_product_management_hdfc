@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs/dist/bcrypt");
 const User = require("../models/User");
 const { StatusCode, CONTENT_TYPE_APPLICATION_JSON, ErrorPhrases } = require("../utils/errorPhrase");
-const { ErrorHandler, SECRET_KEY } = require("../utils/utils");
+const { ErrorHandler } = require("../utils/utils");
 const jwt = require('jsonwebtoken');
 const Order = require("../models/order");
 
@@ -23,7 +23,7 @@ const createUser = async (req, res) => {
                 password: hashedPassword,
             });
 
-            const token = jwt.sign({ userId: user.id }, SECRET_KEY);
+            const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY);
 
             user.token = token;
             await user.save();
@@ -40,8 +40,9 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
     try {
         const users = await User.findAll({ include: [{ model: Order, required: false }], });
+        const totalCount = await User.count();
         res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
-        res.end(JSON.stringify({ data: users }));
+        res.end(JSON.stringify({ data: users, count: totalCount }));
     } catch (error) {
         console.log(error)
         res.writeHead(StatusCode.INTERNAL_SERVER_ERROR, CONTENT_TYPE_APPLICATION_JSON);
@@ -63,16 +64,16 @@ const userLogin = async (req, res) => {
             if (!user) {
                 res.writeHead(StatusCode.NOT_FOUND, CONTENT_TYPE_APPLICATION_JSON);
                 res.end(JSON.stringify({ message: ErrorPhrases.USER_NOT_FOUND }));
-            }
-
-            const isMatched = await bcrypt.compare(password, user.password);
-
-            if (!isMatched) {
-                res.writeHead(StatusCode.UNAUTHORIZED, CONTENT_TYPE_APPLICATION_JSON);
-                res.end(JSON.stringify({ message: ErrorPhrases.INVALID_CREDENTIALS }));
             } else {
-                res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
-                res.end(JSON.stringify({ data: user }));
+                const isMatched = await bcrypt.compare(password, user.password);
+
+                if (!isMatched) {
+                    res.writeHead(StatusCode.UNAUTHORIZED, CONTENT_TYPE_APPLICATION_JSON);
+                    res.end(JSON.stringify({ message: ErrorPhrases.INVALID_CREDENTIALS }));
+                } else {
+                    res.writeHead(StatusCode.SUCCESS, CONTENT_TYPE_APPLICATION_JSON);
+                    res.end(JSON.stringify({ data: user }));
+                }
             }
 
         } catch (error) {
@@ -99,7 +100,7 @@ const userPasswordReset = async (req, res) => {
             }
             const seperatedtoken = matches[1];
 
-            const decoded = jwt.verify(seperatedtoken, SECRET_KEY);
+            const decoded = jwt.verify(seperatedtoken, process.env.SECRET_KEY);
 
             const user = await User.findByPk(decoded.userId);
 

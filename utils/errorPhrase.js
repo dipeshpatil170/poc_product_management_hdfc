@@ -11,15 +11,15 @@ const StatusCode = {
 }
 
 const ErrorPhrases = {
-    END_POINT_NOT_FOUND: 'The endpoint you are trying to access is not found.',
-    TOKEN_NOT_PROVIDED: 'Token not provoided',
-    UNAUTHORIZED: 'Unauthorized',
-    INVALID_TOKEN: 'Invalid Token',
-    FORBIDDEN: 'forbidden',
-    USER_NOT_FOUND: 'User not found',
-    INVALID_CREDENTIALS: 'Invalid Credentials',
-    ID_NOT_FOUND: 'ID not found in url',
-    DATA_NOT_FOUND: 'The data you are trying to search it is not found'
+    END_POINT_NOT_FOUND: 'The endpoint you are attempting to access cannot be found.',
+    TOKEN_NOT_PROVIDED: 'Token not provided.',
+    UNAUTHORIZED: 'Access unauthorized.',
+    INVALID_TOKEN: 'The token provided is invalid.',
+    FORBIDDEN: 'Access forbidden.',
+    USER_NOT_FOUND: 'The user could not be found.',
+    INVALID_CREDENTIALS: 'Invalid credentials; please double-check your login information and try again.',
+    ID_NOT_FOUND: 'The specified ID was not found in the URL.',
+    DATA_NOT_FOUND: 'The data you are attempting to search for is not found.'
 }
 
 module.exports = {
